@@ -1,0 +1,67 @@
+; rca_capture.inf
+; WinUSB driver for USB video capture devices (STK1160 / EMP2860 / EMP2861)
+; Compatible: Windows 10 (1903+) and Windows 11
+;
+; Install:
+;   1. Enable test-signing if unsigned:
+;        bcdedit /set testsigning on   (reboot required)
+;   2. Right-click this file > Install  OR
+;        pnputil /add-driver rca_capture.inf /install
+;
+; After install, OBS "Video Capture Device" will list "RCA Capture".
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = USBDevice
+ClassGuid   = {88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider    = %ManufacturerName%
+CatalogFile = rca_capture.cat
+DriverVer   = 05/30/2026,1.0.0.0
+PnpLockdown = 1
+
+; -----------------------------------------------------------------------
+; Supported devices  (add your VID&PID here if different)
+; -----------------------------------------------------------------------
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64
+
+[Standard.NTamd64]
+%Dev.STK1160%  = USB_Install, USB\VID_05E1&PID_0408   ; Syntek STK1160
+%Dev.EMP2861%  = USB_Install, USB\VID_EB1A&PID_2861   ; eMPIA EMP2861
+%Dev.EMP2860%  = USB_Install, USB\VID_EB1A&PID_2860   ; eMPIA EMP2860
+%Dev.SM007%    = USB_Install, USB\VID_1C88&PID_0007   ; Somagic SM-USB 007
+%Dev.AV0828%   = USB_Install, USB\VID_2040&PID_7200   ; Hauppauge/Auvitek
+%Dev.Generic%  = USB_Install, USB\VID_EB1A&PID_E8D3   ; eMPIA generic
+
+; -----------------------------------------------------------------------
+; WinUSB installation (no kernel driver to build/sign)
+; -----------------------------------------------------------------------
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include = winusb.inf
+Needs   = WINUSB.NT.Services
+
+[USB_Install.Wdf]
+KmdfService = WinUSB, WinUsb_Install
+
+[USB_Install.HW]
+AddReg = Dev_AddReg
+
+; Device interface GUID used by the user-mode library to find the device
+[Dev_AddReg]
+HKR,, DeviceInterfaceGUIDs, 0x10000, "{D46A89B0-5A5E-4A8C-B9E1-6C2D5F8A0B3E}"
+
+; -----------------------------------------------------------------------
+; Strings
+; -----------------------------------------------------------------------
+[Strings]
+ManufacturerName = "RCA Capture Open Driver"
+Dev.STK1160      = "USB Video Capture STK1160"
+Dev.EMP2861      = "USB Video Capture EMP2861"
+Dev.EMP2860      = "USB Video Capture EMP2860"
+Dev.SM007        = "USB Video Capture Somagic"
+Dev.AV0828       = "USB Video Capture AV0828"
+Dev.Generic      = "USB Video Capture (Generic)"
