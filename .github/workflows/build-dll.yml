@@ -13,11 +13,23 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Verify Visual Studio
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+            -latest -products * -property installationPath
+
+          if (-not $vs) {
+            throw "Visual Studio was not found on this runner."
+          }
+
+          Write-Host "Visual Studio found: $vs"
 
       - name: Configure CMake
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
